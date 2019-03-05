@@ -6,8 +6,11 @@ const mongoose = require('mongoose');
 const conf = require('./conf');
 const app = require('./app');
 
-const connections = new Map();
+const RoomList = require('./roomlist');
 
+const roomList = new RoomList();
+
+const connections = new Map();
 
 // link db
 mongoose.connect(conf.MONGODB_HOST,{ useNewUrlParser: true, useCreateIndex: true });
@@ -25,28 +28,22 @@ function noop(){}
 function handleConnect(ws, uid) {
 
   const deprecated = connections.get(uid);
-
   // 用户已有链接 先断掉链接
-  if(deprecated) {
-    console.log('用户已有链接');
-    deprecated.terminate();
-  }
-
+  if(deprecated) deprecated.terminate();
   //创建新的连接
-  console.log('创建新的连接');
   connections.set(uid, ws);
-
   // 返回用户列表
-  ws.send([...connections.keys()].toString());
-
-  // 绑定事件
-  console.log('绑定事件');
+  ws.send(JSON.stringify([...connections.keys()]));
 
   ws.on('message', msg => {
     console.log(msg);
+    var roomId;
+    if(msg ==='NEWROOM') {
+      roomId = roomList.newRoom(uid,ws);
+    }
     connections.forEach(function(socket, key) {
       console.log(key)
-      if(key!==uid) socket.send(msg)
+      if(key!==uid) socket.send(roomId);
     });
   });
 

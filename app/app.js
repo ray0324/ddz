@@ -12,6 +12,7 @@ async function onError(ctx, next) {
   try {
     await next();
   } catch (e) {
+    console.log(ctx.status)
     // 设置状态码为 200 - 服务端错误
     ctx.status = 200;
     // 输出详细的错误信息

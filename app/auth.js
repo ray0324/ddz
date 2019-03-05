@@ -6,7 +6,6 @@ function tokenForUser(user) {
   return jwt.encode({ sub: user.id, iat: Date.now() }, conf.APP_SECRET);
 }
 
-
 async function auth(ctx) {
   const { username, email, password } = ctx.request.body;
   // 注册
@@ -31,9 +30,6 @@ async function auth(ctx) {
       token: tokenForUser(user)
     };
   }
-
-
-
 };
 
 module.exports = auth

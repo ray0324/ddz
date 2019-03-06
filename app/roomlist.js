@@ -6,6 +6,7 @@ class RoomList {
   constructor() {
     this.roomList = [];
   }
+
   // 创建房间
   newRoom(uid,socket) {
     const roomId = uuid();
@@ -22,6 +23,16 @@ class RoomList {
   // 进入房间
   quitRoom(uid,roomId) {
 
+  }
+
+  // 列出房间信息
+  listRoom() {
+    return this.roomList.map(room=>{
+      return {
+        roomId: room.roomId,
+        players: room.players.map(player=>player.uid)
+      }
+    })
   }
 
   // 删除空房间

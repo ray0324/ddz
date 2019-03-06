@@ -41,9 +41,11 @@ function handleConnect(ws, uid) {
     if(msg ==='NEWROOM') {
       roomId = roomList.newRoom(uid,ws);
     }
+    const rooms = roomList.listRoom();
+    console.log(rooms);
     connections.forEach(function(socket, key) {
-      console.log(key)
-      if(key!==uid) socket.send(roomId);
+      // console.log(key)
+      if(key!==uid) socket.send(JSON.stringify(rooms));
     });
   });
 

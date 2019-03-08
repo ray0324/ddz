@@ -6,11 +6,11 @@ const mongoose = require('mongoose');
 const conf = require('./conf');
 const app = require('./app');
 
-const RoomList = require('./roomlist');
+const connections = require('./connections');
+const handleMsg =  require('./handleMsg');
 
-const roomList = new RoomList();
-
-const connections = new Map();
+// 用户id
+var UID = 10000;
 
 // link db
 mongoose.connect(conf.MONGODB_HOST,{ useNewUrlParser: true, useCreateIndex: true });
@@ -19,7 +19,6 @@ const server = http.createServer(app.callback());
 const webSocketServer = new WebSocket.Server({ noServer: true });
 
 function heartbeat() {
-  // console.log('heartbeat');
   this.isAlive = true;
 }
 
@@ -33,35 +32,26 @@ function handleConnect(ws, uid) {
   //创建新的连接
   connections.set(uid, ws);
   // 返回用户列表
-  ws.send(JSON.stringify([...connections.keys()]));
-
-  ws.on('message', msg => {
-    console.log(msg);
-    var roomId;
-    if(msg ==='NEWROOM') {
-      roomId = roomList.newRoom(uid,ws);
-    }
-    const rooms = roomList.listRoom();
-    console.log(rooms);
-    connections.forEach(function(socket, key) {
-      // console.log(key)
-      if(key!==uid) socket.send(JSON.stringify(rooms));
-    });
-  });
-
+  for (let socket of connections.values()) {
+    socket.send(JSON.stringify([...connections.keys()]));
+  }
+  // 处理业务逻辑
+  ws.on('message', msg => handleMsg(msg,uid,ws));
+  // 心跳包回应
   ws.on('pong', heartbeat);
-
   // 关闭链接
-  ws.on('close',()=>connections.delete(uid))
+  ws.on('close',()=>connections.delete(uid));
 }
 
 
 function handleUpgrade(request, socket, head) {
   try {
-    const { query } = url.parse(request.url);
-    const token = new URLSearchParams(query).get("token");
-    const user = jwt.decode(token, conf.APP_SECRET);
-    webSocketServer.handleUpgrade(request, socket, head, ws => webSocketServer.emit('connection', ws, user.sub));
+    // const { query } = url.parse(request.url);
+    // const token = new URLSearchParams(query).get("token");
+    // const user = jwt.decode(token, conf.APP_SECRET);
+
+    webSocketServer.handleUpgrade(request, socket, head, ws => webSocketServer.emit('connection', ws, UID++));
+
   } catch(e){
     socket.destroy();
   }

@@ -1,10 +1,9 @@
 class Player {
-  constructor(uid,socket) {
-    this.uid = uid;
+  constructor(id,socket) {
+    this.id = id;
     this.socket =  socket;
     this.pokers = [];
   }
 }
-
 
 module.exports = Player;

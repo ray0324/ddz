@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "bcrypt": "^3.0.4",
+    "debug": "^4.1.1",
     "dotenv": "^6.2.0",
     "jwt-simple": "^0.5.5",
     "koa": "^2.7.0",

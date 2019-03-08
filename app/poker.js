@@ -1,3 +1,6 @@
+
+// 扑克牌
+// 第一位数字代表花色 后两位代表点数
 const POKERS = [
   100,101,102,103,104,105,106,107,108,109,110,111,112,
   200,201,202,203,204,205,206,207,208,209,210,211,212,
@@ -16,7 +19,7 @@ const SUIT = {
 
 class Poker {
   constructor(){
-    this.pokers = this.getpokers()
+    this.pokers = this.getpokers();
   }
 
   getpokers() {
@@ -43,10 +46,10 @@ class Poker {
       this.pokers.slice(34,51),
     ];
     const remains = this.pokers.slice(51);
-    return {
-      delivers, // 发出的牌
-      remains // 底牌
-    };
+    return  {
+      delivers,
+      remains
+    }
   }
 }
 

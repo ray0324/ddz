@@ -1,6 +1,6 @@
 const debug = require('debug')('ddz');
 const uuid = require('uuid/v4');
-const Room = require('./room');
+const Room = require('./Room');
 
 
 class RoomList {
@@ -30,11 +30,6 @@ class RoomList {
       roomId: room.roomId,
       players: room.players.map(player=>player.id)
     }
-  }
-
-  // 进入房间
-  quitRoom(uid,roomId) {
-
   }
 
   // 列出房间信息

@@ -1,72 +1,82 @@
-const Poker = require('./poker');
-const Player = require('./player');
-const debug = require('debug')('ddz');
-// 超时时间
-const TIME_OUT = 30000;
+const Poker = require("./Poker");
+const Player = require("./Player");
+const uuid = require('uuid/v1');
+const debug = require("debug")("ddz");
+
 // 房间玩家数量
 const PLAYERS_NUM = 3;
 
 class Room {
-  constructor(roomId,uid,socket) {
+  constructor(roomId) {
+    // 房间号码
     this.roomId = roomId;
     // 玩家
     this.players = [];
     // 当前玩家
-    this.currentIndex = -1;
-    // 倒计时
-    this.timeoutId = null;
+    this.cur = -1;
+    // 地主
+    this.landLoadIdx = -1;
+
     // 扑克牌底牌
-    this.remains = null;
-    // 添加默认玩家
-    this.addPlayer(uid,socket);
+    this.remains = [];
+
+    // 积分器
+    this.score = null;
+
   }
 
-  // 初始化
+  // 初始化s
   init() {
-    const poker = new Poker();
-    this.currentIndex = this.getRandomIndex();
-    const { delivers, remains} = poker.deliver();
+    // 生成已经洗好的扑克
+    const pokers = Poker.create();
+
+    // 随机地主
+    this.cur = this.getRandomIndex();
+
     //为每位玩家分牌
-    this.players.forEach((player,idx)=>{
-      player.pokers = delivers[idx];
-      debug(player.id,delivers[idx]);
-      player.socket.send(JSON.stringify(player.pokers));
+    this.players.forEach((player, idx) => {
+      player.pokers = pokers.slice(idx * 17, (idx + 1) * 17);
     });
-    this.remains = remains;
-    debug(remains);
-    this.sendRemains();
+
+    // 三张底牌
+    this.remains = pokers.slice(51, 54);
+
+    debug(this.remains);
+
   }
 
   // 发底牌
   sendRemains() {
-    this.players[this.currentIndex].socket.send(JSON.stringify(this.remains));
-    this.remains = null;
+    this.landLoadIdx = this.cur;
+    this.players[this.cur].pokers.push(...this.remains);
   }
 
-  // 随机一个玩家首先叫地主
+  // 随机地主
   getRandomIndex() {
     return Math.floor(Math.random() * PLAYERS_NUM);
   }
 
+
+
   // 获取下一个玩家
-  getNextPlayer(){
-    this.currentIndex = this.currentIndex++ % PLAYERS_NUM;
-    return this.players[this.currentIndex];
+  getNextPlayer() {
+    this.cur = this.cur++ % PLAYERS_NUM;
+    return this.players[this.cur];
   }
 
   // 广播所有玩家
   broadcast(msg) {
-    this.players.forEach(player=>{
-      player.socket.send(msg);
+    this.players.forEach(player => {
+      player.send(msg);
     });
   }
 
   // 添加玩家
-  addPlayer(uid,socket) {
+  addPlayer(player) {
     // 房间已经满了 不能进入
-    if(this.players.length > PLAYERS_NUM) return null;
-    this.players.push(new Player(uid,socket));
-    return this.players;
+    if (this.players.length > PLAYERS_NUM) return null;
+    player.setRoom(this);
+    this.players.push(player);
   }
 }
 

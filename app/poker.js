@@ -1,4 +1,4 @@
-In this game, there are 13 types of combination that can be played:
+// In this game, there are 13 types of combination that can be played:
 
 // 1.  Single card - ranking from three (low) up to red joker (high) as explained
 //     above
